@@ -4,11 +4,13 @@ import './index.css';
 import Canvas from './components/canvas/canvas';
 import reportWebVitals from './reportWebVitals';
 import {StoreProvider} from "./components/store/store";
+import AdjustBar from "./components/adjustbar/adjustbar";
 
 ReactDOM.render(
     <React.StrictMode>
         <StoreProvider>
-            <Canvas width={window.innerWidth} height={window.innerHeight}/>
+            <AdjustBar />
+            <Canvas width={window.innerWidth} height={window.innerHeight - 50}/>
         </StoreProvider>
     </React.StrictMode>,
     document.getElementById('root')
