@@ -7,10 +7,11 @@ const defaultTableInfo = {
     columnCount: 30,
     cellHeight: 25,
     cellWidth: 100,
-    rowHeaderWidth: 100,
-    rowHeaderHeight: 25,
-    columnHeaderWidth: 50,
-    columnHeaderHeight: 25
+    // columnHeaderWidth: 100,
+    columnHeaderHeight: 25,
+    // rowHeaderHeight: 25,
+    rowHeaderWidth: 50,
+    strokeWidth: 0.5,
 }
 const initialState = {fileName: "new_file", canvasCtx: null, tableInfo: defaultTableInfo}
 

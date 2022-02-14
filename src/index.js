@@ -10,7 +10,7 @@ ReactDOM.render(
     <React.StrictMode>
         <StoreProvider>
             <AdjustBar />
-            <Canvas width={window.innerWidth} height={window.innerHeight - 50}/>
+            <Canvas width={window.innerWidth} height={window.innerHeight-80} />
         </StoreProvider>
     </React.StrictMode>,
     document.getElementById('root')
