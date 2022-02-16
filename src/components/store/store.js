@@ -3,10 +3,10 @@ import React, {createContext, useContext, useReducer} from 'react';
 const DispatchContext = createContext(null);
 const StateContext = createContext(null);
 const defaultTableInfo = {
-    rowCount:100,
-    columnCount: 30,
+    rowCount:23,
+    columnCount: 17,
     cellHeight: 25,
-    cellWidth: 100,
+    cellWidth: 80,
     columnHeaderHeight: 30,
     rowHeaderWidth: 50,
     strokeWidth: 1,

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useDispatch, useStore} from "../store/store";
 /*
 * //// column
@@ -11,28 +11,19 @@ function Canvas(props) {
     const dispatch = useDispatch();
     const store = useStore();
 
-    function initEvent(canvas,tableInfo) {
-        canvas.onmousemove = (e) => {
-            drawTableHeader(canvas.getContext("2d"),tableInfo,e);
-            // if (e.offsetY < columnHeaderHeight && e.offsetX > rowHeaderWidth) {
-            //     // console.log(`columnHeader columnHeaderHeight:${columnHeaderHeight}  rowHeaderWidth:${rowHeaderWidth} mousePos:[${e.clientX},${e.clientY}]  `)
-            //     // console.log(`columnHeader`)
-            //     const colIndex = Math.ceil((e.offsetX - rowHeaderWidth) / cellWidth  + 1);
-            //     const ctx = canvas.getContext("2d");
-            //     ctx.beginPath();
-            //     ctx.rect(rowHeaderWidth + (colIndex - 1) * cellWidth,0,cellWidth,columnHeaderHeight);
-            //     ctx.fillStyle = "#959393"
-            //     ctx.fill();
-            // } else if (e.offsetX < rowHeaderWidth && e.offsetY > columnHeaderHeight) {
-            //     // console.log(`rowHeader columnHeaderHeight:${columnHeaderHeight}  rowHeaderWidth:${rowHeaderWidth} mousePos:[${e.clientX},${e.clientY}]`)
-            //     // console.log(`rowHeader`)
-            // }
+    const canvasMouseMove = (canvas)=> {
+        return (e) => {
+            clear(canvas);
+            drawTableHeader(canvas.getContext("2d"),store.tableInfo,e);
         }
     }
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        initEvent(canvas,store.tableInfo);
+        canvas.onmousemove = (e) => {
+            clear(canvas);
+            drawTableHeader(canvas.getContext("2d"),store.tableInfo,e);
+        }
         const context = canvas.getContext('2d')
         console.log("init")
         dispatch({
@@ -40,14 +31,22 @@ function Canvas(props) {
             value: context,
         })
         drawTableHeader(context,store.tableInfo);
+        window.onresize = (e) => {
+            context.canvas.width = window.innerWidth;
+            context.canvas.height = window.innerHeight - 80;
+            drawTableHeader(context,store.tableInfo);
+        }
     }, [])
 
     useEffect(()=>{
         const canvas = canvasRef.current
         if (!!!store.canvasCtx) return;
+        canvas.onmousemove = (e) => {
+            clear(canvas);
+            drawTableHeader(canvas.getContext("2d"),store.tableInfo,e);
+        }
         console.log("render")
-        store.canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-        store.canvasCtx.beginPath();
+        clear(canvas);
         drawTableHeader(store.canvasCtx,store.tableInfo);
     },[store.tableInfo])
 
@@ -56,6 +55,13 @@ function Canvas(props) {
     );
 }
 
+
+
+function clear(canvas) {
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath();
+}
 /*
 * empty cell first
 * can be adjust individul
@@ -74,30 +80,32 @@ function drawTableHeader(ctx,tableInfo,e=null) {
     // draw split sign
     // col header
     let colIndex = 0;
-    for (let i = 1; i <= columnCount; i++) {
+    for (let i = 1; i <= columnCount +1; i++) {
         if (i === 1) {
             colIndex += rowHeaderWidth + strokeWidth
         } else {
             colIndex += cellWidth + strokeWidth;
         }
+        drawLine(ctx,[colIndex, 0],[colIndex, sumHeight],'#e6e6e6',strokeWidth)
+        if (columnCount +1 === i) break;
         if (e && e.offsetY < columnHeaderHeight && e.offsetX > rowHeaderWidth && Math.ceil((e.offsetX - rowHeaderWidth - strokeWidth) / (cellWidth+strokeWidth) ) ===i) {
             drawRect(ctx,[colIndex,0],cellWidth,columnHeaderHeight,"#cbcaca")
         }
-        drawLine(ctx,[colIndex, 0],[colIndex, window.innerHeight],'#e6e6e6',strokeWidth)
         drawText(ctx, String.fromCharCode(i + 64) ,  [colIndex + cellWidth / 2, columnHeaderHeight / 2]);
     }
     // row header
     let rowIndex = 0;
-    for (let i = 1; i <= rowCount; i++) {
+    for (let i = 1; i <= rowCount+1; i++) {
         if (i === 1) {
             rowIndex += columnHeaderHeight + strokeWidth
         } else {
             rowIndex += cellHeight + strokeWidth;
         }
+        drawLine(ctx,[0, rowIndex],[sumWidth,  rowIndex],'#e6e6e6',strokeWidth)
+        if (rowCount +1 === i) break;
         if (e && e.offsetX < rowHeaderWidth && e.offsetY > columnHeaderHeight && Math.ceil((e.offsetY - columnHeaderHeight - strokeWidth) / (cellHeight + strokeWidth) ) === i) {
             drawRect(ctx,[0,rowIndex],rowHeaderWidth,cellHeight,"#cbcaca")
         }
-        drawLine(ctx,[0, rowIndex],[window.innerWidth,  rowIndex],'#e6e6e6',strokeWidth)
         drawText(ctx, i ,  [rowHeaderWidth / 2, rowIndex + cellHeight  / 2]);
 
     }
