@@ -18,8 +18,10 @@ function AdjustBar() {
     return (
 
         <form className={"flex"}>
-            {Object.keys(store.tableInfo).map(key=>{
-                return (<Input  onBlur={valueChange(key)} key={key} value={store.tableInfo[key]} id={key}  />)
+            {Object.keys(store.tableInfo)
+                .filter(key=>typeof store.tableInfo[key] == "number")
+                .map(key=>{
+                    return (<Input  onBlur={valueChange(key)} key={key} min={1} value={store.tableInfo[key]} id={key}  />)
             })}
         </form>
     );

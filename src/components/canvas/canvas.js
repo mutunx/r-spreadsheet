@@ -11,12 +11,6 @@ function Canvas(props) {
     const dispatch = useDispatch();
     const store = useStore();
 
-    const canvasMouseMove = (canvas)=> {
-        return (e) => {
-            clear(canvas);
-            drawTableHeader(canvas.getContext("2d"),store.tableInfo,e);
-        }
-    }
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -68,12 +62,12 @@ function clear(canvas) {
 * */
 function drawTableHeader(ctx,tableInfo,e=null) {
 
-    const {rowCount,columnCount,cellHeight,cellWidth,columnHeaderHeight,rowHeaderWidth,strokeWidth} = tableInfo;
+    const {rowCount,columnCount,cellHeight,cellWidth,columnHeaderHeight,rowHeaderWidth,strokeWidth,baseColor,hoverColor,lineColor} = tableInfo;
     const sumHeight = rowCount * cellHeight + columnHeaderHeight + rowCount * strokeWidth; // sum height + empty header + border
     const sumWidth = columnCount * cellWidth + rowHeaderWidth + columnCount * strokeWidth;
     ctx.save();
     // draw header
-    ctx.fillStyle = '#f4f5f8';
+    ctx.fillStyle = baseColor;
     ctx.fillRect(0, 0, rowHeaderWidth, sumHeight);
     ctx.fillRect(0, 0, sumWidth, columnHeaderHeight);
     ctx.restore();
@@ -86,10 +80,10 @@ function drawTableHeader(ctx,tableInfo,e=null) {
         } else {
             colIndex += cellWidth + strokeWidth;
         }
-        drawLine(ctx,[colIndex, 0],[colIndex, sumHeight],'#e6e6e6',strokeWidth)
+        drawLine(ctx,[colIndex, 0],[colIndex, sumHeight],lineColor,strokeWidth)
         if (columnCount +1 === i) break;
         if (e && e.offsetY < columnHeaderHeight && e.offsetX > rowHeaderWidth && Math.ceil((e.offsetX - rowHeaderWidth - strokeWidth) / (cellWidth+strokeWidth) ) ===i) {
-            drawRect(ctx,[colIndex,0],cellWidth,columnHeaderHeight,"#cbcaca")
+            drawRect(ctx,[colIndex,0],cellWidth,columnHeaderHeight,hoverColor)
         }
         drawText(ctx, String.fromCharCode(i + 64) ,  [colIndex + cellWidth / 2, columnHeaderHeight / 2]);
     }
@@ -101,10 +95,10 @@ function drawTableHeader(ctx,tableInfo,e=null) {
         } else {
             rowIndex += cellHeight + strokeWidth;
         }
-        drawLine(ctx,[0, rowIndex],[sumWidth,  rowIndex],'#e6e6e6',strokeWidth)
+        drawLine(ctx,[0, rowIndex],[sumWidth,  rowIndex],lineColor,strokeWidth)
         if (rowCount +1 === i) break;
         if (e && e.offsetX < rowHeaderWidth && e.offsetY > columnHeaderHeight && Math.ceil((e.offsetY - columnHeaderHeight - strokeWidth) / (cellHeight + strokeWidth) ) === i) {
-            drawRect(ctx,[0,rowIndex],rowHeaderWidth,cellHeight,"#cbcaca")
+            drawRect(ctx,[0,rowIndex],rowHeaderWidth,cellHeight,hoverColor)
         }
         drawText(ctx, i ,  [rowHeaderWidth / 2, rowIndex + cellHeight  / 2]);
 

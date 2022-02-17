@@ -9,7 +9,10 @@ const defaultTableInfo = {
     cellWidth: 80,
     columnHeaderHeight: 30,
     rowHeaderWidth: 50,
-    strokeWidth: 1,
+    strokeWidth: 0.6,
+    baseColor: "#f3f4f6",
+    hoverColor: "#e5e7eb",
+    lineColor: "#d1d5db"
 }
 const initialState = {fileName: "new_file", canvasCtx: null, tableInfo: defaultTableInfo}
 
