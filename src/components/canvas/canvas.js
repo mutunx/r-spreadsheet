@@ -13,8 +13,9 @@ function Canvas(props) {
     useEffect(() => {
         const canvas = canvasRef.current
         const ctx = canvas.getContext('2d');
-        canvas.onmousemove = canvasEvents(ctx, "onmousemove", store.tableInfo);
         canvasDraw(ctx, "DrawTable", store.tableInfo);
+        canvas.onmousemove = canvasEvents(ctx, "onmousemove", store.tableInfo);
+        canvas.onwheel = canvasEvents(ctx,"onwheel", store.tableInfo,dispatch);
         window.onresize = canvasEvents(ctx, "onresize", store.tableInfo)
     }, [store.tableInfo])
 

@@ -2,6 +2,7 @@ const drawEvents = {
     "Text": drawText,
     "DrawTable": drawTableHeader,
 }
+const alphabets = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
 
 function drawTableHeader(ctx, tableInfo, e = null) {
@@ -15,7 +16,8 @@ function drawTableHeader(ctx, tableInfo, e = null) {
         strokeWidth,
         baseColor,
         hoverColor,
-        lineColor
+        lineColor,
+        scroll
     } = tableInfo;
     const sumHeight = rowCount * cellHeight + columnHeaderHeight + rowCount * strokeWidth; // sum height + empty header + border
     const sumWidth = columnCount * cellWidth + rowHeaderWidth + columnCount * strokeWidth;
@@ -41,7 +43,7 @@ function drawTableHeader(ctx, tableInfo, e = null) {
         if (e && e.offsetY < columnHeaderHeight && e.offsetX > rowHeaderWidth && Math.ceil((e.offsetX - rowHeaderWidth - strokeWidth) / (cellWidth + strokeWidth)) === i) {
             drawRect(ctx, [colIndex, 0], cellWidth, columnHeaderHeight, hoverColor)
         }
-        drawText(ctx, String.fromCharCode(i + 64), [colIndex + cellWidth / 2, columnHeaderHeight / 2]);
+        drawText(ctx, stringAt(scroll.ci + i - 1), [colIndex + cellWidth / 2, columnHeaderHeight / 2]);
     }
     // row header
     let rowIndex = 0;
@@ -56,7 +58,7 @@ function drawTableHeader(ctx, tableInfo, e = null) {
         if (e && e.offsetX < rowHeaderWidth && e.offsetY > columnHeaderHeight && Math.ceil((e.offsetY - columnHeaderHeight - strokeWidth) / (cellHeight + strokeWidth)) === i) {
             drawRect(ctx, [0, rowIndex], rowHeaderWidth, cellHeight, hoverColor)
         }
-        drawText(ctx, i, [rowHeaderWidth / 2, rowIndex + cellHeight / 2]);
+        drawText(ctx, scroll.ri + i, [rowHeaderWidth / 2, rowIndex + cellHeight / 2]);
 
     }
 }
@@ -92,3 +94,15 @@ function drawText(ctx, text, drawTo) {
     ctx.fillText(text, drawTo[0], drawTo[1]);
 }
 
+function stringAt(index) {
+    let str = '';
+    let cIndex = index;
+    while (cIndex >= alphabets.length) {
+        cIndex /= alphabets.length;
+        cIndex -= 1;
+        str += alphabets[parseInt(cIndex, 10) % alphabets.length];
+    }
+    const last = index % alphabets.length;
+    str += alphabets[last];
+    return str;
+}

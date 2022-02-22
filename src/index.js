@@ -5,12 +5,15 @@ import Canvas from './components/canvas/canvas';
 import reportWebVitals from './reportWebVitals';
 import {StoreProvider} from "./components/store/store";
 import AdjustBar from "./components/adjustbar/adjustbar";
+import Sheet from "./components/sheet/sheet";
 
 ReactDOM.render(
     <React.StrictMode>
         <StoreProvider>
-            <AdjustBar />
-            <Canvas width={window.innerWidth} height={window.innerHeight-80} />
+            <div className={"h-screen w-screen"}>
+                <AdjustBar />
+                <Sheet/>
+            </div>
         </StoreProvider>
     </React.StrictMode>,
     document.getElementById('root')
