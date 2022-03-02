@@ -1,3 +1,5 @@
+import {tab} from "@testing-library/user-event/dist/tab";
+
 const drawEvents = {
     "Text": drawText,
     "DrawTable": drawTableHeader,
@@ -19,8 +21,9 @@ function drawTableHeader(ctx, tableInfo, e = null) {
         lineColor,
         scroll
     } = tableInfo;
-    const sumHeight = rowCount * cellHeight + columnHeaderHeight + rowCount * strokeWidth; // sum height + empty header + border
-    const sumWidth = columnCount * cellWidth + rowHeaderWidth + columnCount * strokeWidth;
+    // sum height + empty header + border
+    const sumHeight = (rowCount - Object.keys(tableInfo.rowHeights).length) * cellHeight + columnHeaderHeight + rowCount * strokeWidth + Object.values(tableInfo.rowHeights).reduce((x,y)=>x+y);
+    const sumWidth = (columnCount - Object.keys(tableInfo.colWidths).length) * cellWidth + rowHeaderWidth + columnCount * strokeWidth + Object.values(tableInfo.colWidths).reduce((x,y)=>x+y);
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.beginPath();
     ctx.save();
@@ -32,33 +35,44 @@ function drawTableHeader(ctx, tableInfo, e = null) {
     // draw split sign
     // col header
     let colIndex = 0;
-    for (let i = 1; i <= columnCount + 1; i++) {
-        if (i === 1) {
+    for (let i = 0; i < columnCount ; i++) {
+        let indexColumnWidth = cellWidth;
+        if (Object.keys(tableInfo.colWidths).includes(i+"")) {
+            indexColumnWidth = tableInfo.colWidths[i];
+        }
+        if (i === 0) {
             colIndex += rowHeaderWidth + strokeWidth
         } else {
-            colIndex += cellWidth + strokeWidth;
+            colIndex += indexColumnWidth + strokeWidth;
         }
         drawLine(ctx, [colIndex, 0], [colIndex, sumHeight], lineColor, strokeWidth)
         if (columnCount + 1 === i) break;
         if (e && e.offsetY < columnHeaderHeight && e.offsetX > rowHeaderWidth && Math.ceil((e.offsetX - rowHeaderWidth - strokeWidth) / (cellWidth + strokeWidth)) === i) {
-            drawRect(ctx, [colIndex, 0], cellWidth, columnHeaderHeight, hoverColor)
+            drawRect(ctx, [colIndex, 0], indexColumnWidth, columnHeaderHeight, hoverColor)
         }
-        drawText(ctx, stringAt(scroll.ci + i - 1), [colIndex + cellWidth / 2, columnHeaderHeight / 2]);
+        drawText(ctx, stringAt(scroll.ci + i ), [colIndex + indexColumnWidth / 2, columnHeaderHeight / 2]);
     }
     // row header
     let rowIndex = 0;
-    for (let i = 1; i <= rowCount + 1; i++) {
-        if (i === 1) {
+    for (let i = 0; i < rowCount + 1; i++) {
+        let indexCellHeight = cellHeight;
+        if (Object.keys(tableInfo.rowHeights).includes(i+"")) {
+            indexCellHeight = tableInfo.rowHeights[i];
+        }
+        if (i === 0) {
             rowIndex += columnHeaderHeight + strokeWidth
         } else {
-            rowIndex += cellHeight + strokeWidth;
+            rowIndex += indexCellHeight + strokeWidth;
+        }
+
+        if (rowCount + 1 === i) break;
+        if (i > 0) {
+            if (e && e.offsetX < rowHeaderWidth && e.offsetY > columnHeaderHeight && Math.ceil((e.offsetY - columnHeaderHeight - strokeWidth) / (cellHeight + strokeWidth)) === i) {
+                drawRect(ctx, [0, rowIndex], rowHeaderWidth, indexCellHeight, hoverColor)
+            }
+            drawText(ctx, scroll.ri + i + 1, [rowHeaderWidth / 2, rowIndex + indexCellHeight / 2]);
         }
         drawLine(ctx, [0, rowIndex], [sumWidth, rowIndex], lineColor, strokeWidth)
-        if (rowCount + 1 === i) break;
-        if (e && e.offsetX < rowHeaderWidth && e.offsetY > columnHeaderHeight && Math.ceil((e.offsetY - columnHeaderHeight - strokeWidth) / (cellHeight + strokeWidth)) === i) {
-            drawRect(ctx, [0, rowIndex], rowHeaderWidth, cellHeight, hoverColor)
-        }
-        drawText(ctx, scroll.ri + i, [rowHeaderWidth / 2, rowIndex + cellHeight / 2]);
 
     }
 }

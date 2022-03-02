@@ -3,9 +3,9 @@ import {useDispatch, useStore} from "../store/store";
 import canvasEvents from "../../services/CanvasEvents";
 import canvasDraw from "../../services/CanvasDraw";
 
-function Canvas(props) {
+function  Canvas(props) {
 
-    const {...rest} = props
+    const {setCanvas,...rest} = props
     const canvasRef = useRef(null)
     const dispatch = useDispatch();
     const store = useStore();
@@ -17,6 +17,7 @@ function Canvas(props) {
         canvas.onmousemove = canvasEvents(ctx, "onmousemove", store.tableInfo);
         canvas.onwheel = canvasEvents(ctx,"onwheel", store.tableInfo,dispatch);
         window.onresize = canvasEvents(ctx, "onresize", store.tableInfo)
+        setCanvas(canvasRef);
     }, [store.tableInfo])
 
     useEffect(() => {
