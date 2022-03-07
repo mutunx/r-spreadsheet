@@ -14,7 +14,7 @@ const defaultTableInfo = {
     hoverColor: "#e5e7eb",
     lineColor: "#d1d5db",
     rowHeights:{
-        2:30,
+        2:40,
     },
     colWidths:{
         2:40,
