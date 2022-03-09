@@ -1,3 +1,4 @@
+import {checkMouseInResizeBar} from "./CanvasEvents";
 
 const drawEvents = {
     "Text": drawText,
@@ -18,11 +19,17 @@ function drawTableHeader(ctx, tableInfo, e = null) {
         baseColor,
         hoverColor,
         lineColor,
-        scroll
+        scroll,
+        rowHeights,
+        colWidths,
     } = tableInfo;
     // sum height + empty header + border
     const sumHeight = (rowCount - Object.keys(tableInfo.rowHeights).length) * cellHeight + columnHeaderHeight + rowCount * strokeWidth + Object.values(tableInfo.rowHeights).reduce((x,y)=>x+y);
     const sumWidth = (columnCount - Object.keys(tableInfo.colWidths).length) * cellWidth + rowHeaderWidth + columnCount * strokeWidth + Object.values(tableInfo.colWidths).reduce((x,y)=>x+y);
+    const header = {
+        width: rowHeaderWidth + strokeWidth,
+        height: columnHeaderHeight + strokeWidth,
+    }
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.beginPath();
     ctx.save();
@@ -41,8 +48,11 @@ function drawTableHeader(ctx, tableInfo, e = null) {
         }
         drawLine(ctx, [colIndex, 0], [colIndex, sumHeight], lineColor, strokeWidth)
         if (columnCount  === i) break;
-        if (e && e.offsetY < columnHeaderHeight && e.offsetX > rowHeaderWidth && Math.ceil((e.offsetX - rowHeaderWidth - strokeWidth) / (cellWidth + strokeWidth)) === i) {
-            drawRect(ctx, [colIndex, 0], indexColumnWidth, columnHeaderHeight, hoverColor)
+        if (e) {
+            const {posIndex} =  checkMouseInResizeBar(e.offsetX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
+            if (e.offsetY < columnHeaderHeight && e.offsetX > rowHeaderWidth && posIndex === scroll.ci + i) {
+                drawRect(ctx, [colIndex, 0], indexColumnWidth, columnHeaderHeight, hoverColor)
+            }
         }
         drawText(ctx, stringAt(scroll.ci + i ), [colIndex + indexColumnWidth / 2, columnHeaderHeight / 2]);
         colIndex += indexColumnWidth + strokeWidth;
@@ -55,8 +65,11 @@ function drawTableHeader(ctx, tableInfo, e = null) {
             indexCellHeight = tableInfo.rowHeights[scroll.ri + i];
         }
         if (rowCount  === i) break;
-        if (e && e.offsetX < rowHeaderWidth && e.offsetY > columnHeaderHeight && Math.ceil((e.offsetY - columnHeaderHeight - strokeWidth) / (cellHeight + strokeWidth)) === i) {
-            drawRect(ctx, [0, rowIndex], rowHeaderWidth, indexCellHeight, hoverColor)
+        if (e) {
+            const {posIndex} = checkMouseInResizeBar(e.offsetY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth)
+            if (e.offsetX < rowHeaderWidth && e.offsetY > columnHeaderHeight && posIndex === scroll.ri + i) {
+                drawRect(ctx, [0, rowIndex], rowHeaderWidth, indexCellHeight, hoverColor)
+            }
         }
         drawText(ctx, scroll.ri + i + 1, [rowHeaderWidth / 2, rowIndex + indexCellHeight / 2]);
         drawLine(ctx, [0, rowIndex], [sumWidth, rowIndex], lineColor, strokeWidth)

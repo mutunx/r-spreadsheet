@@ -1,6 +1,6 @@
 import React, {useEffect, useRef} from 'react';
 import {useDispatch, useStore} from "../store/store";
-import canvasEvents from "../../services/CanvasEvents";
+import {canvasEvents} from "../../services/CanvasEvents";
 import canvasDraw from "../../services/CanvasDraw";
 
 function  Canvas(props) {

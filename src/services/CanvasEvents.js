@@ -1,5 +1,4 @@
 import CanvasDraw from "./CanvasDraw"
-import canvasDraw from "./CanvasDraw";
 
 const events = {
     "onmousemove": onmousemove,
@@ -35,16 +34,25 @@ function onmousemove(ctx, tableInfo) {
 }
 
 function onresize(ctx, tableInfo) {
-    return (e) => {
+    return () => {
         ctx.canvas.width = window.innerWidth;
         ctx.canvas.height = window.innerHeight - 80;
         CanvasDraw(ctx, "DrawTable", tableInfo);
     }
 }
 
-const CanvasEvents = (ctx, event, ...props) => {
+
+
+export function checkMouseInResizeBar(mousePoint,startPoint,endPoint,startIndex,customList,defaultSize) {
+    let currentPoint = startPoint;
+    for (; currentPoint < endPoint; startIndex++) {
+        if (currentPoint > mousePoint) break;
+        currentPoint += customList[startIndex] ?? defaultSize;
+    }
+    return {posIndex:startIndex-1,posOffset:currentPoint};
+}
+
+export function canvasEvents(ctx, event, ...props) {
     if (!Object.keys(events).includes(event)) console.error("invalid event in drawEvent")
     return events[event](ctx, ...props);
 }
-
-export default CanvasEvents;

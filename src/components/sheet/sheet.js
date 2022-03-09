@@ -1,9 +1,9 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Canvas from "../canvas/canvas";
-import canvasEvents from "../../services/CanvasEvents";
+import {canvasEvents,checkMouseInResizeBar} from "../../services/CanvasEvents";
 import {useDispatch, useStore} from "../store/store";
 
-function Sheet(props) {
+function Sheet() {
 
     let canvas = null;
     const store = useStore();
@@ -12,6 +12,7 @@ function Sheet(props) {
     const [outOfCanvasY,setOutOfCanvasY] = useState(0);
     const [resizeVerPos,setResizeVerPos] = useState(0);
     const [resizeShow,setResizeShow] = useState("");
+    const [resizeBarPos,setResizeBarPos] = useState({index:0,pos:0})
     const resizeHor = useRef(null);
 
     useEffect(()=>{
@@ -31,19 +32,25 @@ function Sheet(props) {
             columnHeaderHeight,
             rowHeaderWidth,
             strokeWidth,
+            rowHeights,
+            colWidths,
+            scroll,
         } = store.tableInfo;
-        // console.log(e.nativeEvent.offsetY , columnHeaderHeight ,e.nativeEvent.offsetX , rowHeaderWidth)
+        const header = {
+            width: rowHeaderWidth + strokeWidth,
+            height: columnHeaderHeight + strokeWidth,
+        }
+        if (resizeBarPos.index !== 0) {
+            return;
+        }
         if (e && e.nativeEvent.offsetY < columnHeaderHeight && e.nativeEvent.offsetX > rowHeaderWidth) {
-            const colIndex = Math.ceil((e.nativeEvent.offsetX - rowHeaderWidth - strokeWidth) / (cellWidth + strokeWidth))
-            const left = colIndex * (cellWidth + strokeWidth) + (rowHeaderWidth + strokeWidth) - 4 ;
-            setResizeHorPos(left);
+            const {posOffset} =  checkMouseInResizeBar(e.nativeEvent.offsetX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
+            setResizeHorPos(posOffset);
             setResizeVerPos(outOfCanvasY);
             setResizeShow("hor");
         } else if (e && e.nativeEvent.offsetX < rowHeaderWidth && e.nativeEvent.offsetY > columnHeaderHeight){
-            const rowIndex =  Math.ceil((e.nativeEvent.offsetY - columnHeaderHeight - strokeWidth) / (cellHeight + strokeWidth));
-            const top = outOfCanvasY + rowIndex * (cellHeight + strokeWidth) + (columnHeaderHeight + strokeWidth) - 4;
-            console.log(rowIndex,top)
-            setResizeVerPos(top);
+            const {posOffset} =  checkMouseInResizeBar(e.nativeEvent.offsetY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
+            setResizeVerPos(outOfCanvasY + posOffset);
             setResizeHorPos(0);
             setResizeShow("ver");
         } else {
@@ -51,18 +58,44 @@ function Sheet(props) {
         }
     }
 
+    // todo drag back not work
+    // todo row resize not impl
     const moveFn =  useCallback((e) => {
+        console.log(e.clientX)
         setResizeHorPos(e.clientX);
     },[]);
 
     function horResizeDown(e) {
-        const el=resizeHor.current
+        const {
+            cellWidth,
+            columnHeaderHeight,
+            rowHeaderWidth,
+            strokeWidth,
+            colWidths,
+            scroll,
+        } = store.tableInfo;
+        const header = {
+            width: rowHeaderWidth + strokeWidth,
+            height: columnHeaderHeight + strokeWidth,
+        }
+        const el=resizeHor.current;
+        const {posIndex} =  checkMouseInResizeBar(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
+        console.log(posIndex)
+        setResizeBarPos({index: posIndex-1,pos: e.clientX});
         el.addEventListener('mousemove',moveFn);
     }
 
     function horResizeUp(e) {
         const el=resizeHor.current
         console.log(e.clientX);
+        console.log(resizeBarPos.index,resizeBarPos.pos,e.clientX-resizeBarPos.pos);
+        let cols = store.tableInfo.colWidths;
+        cols[resizeBarPos.index] = !!!cols[resizeBarPos.index] ? store.tableInfo.cellWidth + e.clientX- resizeBarPos.pos :cols[resizeBarPos.index]+ e.clientX- resizeBarPos.pos;
+        dispatch({
+            type:"tableInfo",
+            value: {...store.tableInfo, colWidths: cols}
+        })
+        setResizeBarPos({index: 0,pos: 0})
         el.removeEventListener('mousemove',moveFn);
     }
 
