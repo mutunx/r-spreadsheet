@@ -12,7 +12,17 @@ const defaultTableInfo = {
     strokeWidth: 0.6,
     baseColor: "#f3f4f6",
     hoverColor: "#e5e7eb",
-    lineColor: "#d1d5db"
+    lineColor: "#d1d5db",
+    rowHeights:{
+        2:40,
+    },
+    colWidths:{
+        2:40,
+    },
+    scroll:{
+        ri:0,
+        ci:0,
+    }
 }
 const initialState = {fileName: "new_file", tableInfo: defaultTableInfo, drawEvent: null}
 
