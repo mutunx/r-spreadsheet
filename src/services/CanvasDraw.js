@@ -1,4 +1,4 @@
-import {checkMouseInResizeBar} from "./CanvasEvents";
+import {transCords2CellIndexAndOffset} from "./CanvasEvents";
 
 const drawEvents = {
     "Text": drawText,
@@ -49,7 +49,7 @@ function drawTableHeader(ctx, tableInfo, e = null) {
         drawLine(ctx, [colIndex, 0], [colIndex, sumHeight], lineColor, strokeWidth)
         if (columnCount  === i) break;
         if (e) {
-            const {posIndex} =  checkMouseInResizeBar(e.offsetX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
+            const {posIndex} =  transCords2CellIndexAndOffset(e.offsetX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
             if (e.offsetY < columnHeaderHeight && e.offsetX > rowHeaderWidth && posIndex === scroll.ci + i) {
                 drawRect(ctx, [colIndex, 0], indexColumnWidth, columnHeaderHeight, hoverColor)
             }
@@ -66,7 +66,7 @@ function drawTableHeader(ctx, tableInfo, e = null) {
         }
         if (rowCount  === i) break;
         if (e) {
-            const {posIndex} = checkMouseInResizeBar(e.offsetY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth)
+            const {posIndex} = transCords2CellIndexAndOffset(e.offsetY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth)
             if (e.offsetX < rowHeaderWidth && e.offsetY > columnHeaderHeight && posIndex === scroll.ri + i) {
                 drawRect(ctx, [0, rowIndex], rowHeaderWidth, indexCellHeight, hoverColor)
             }

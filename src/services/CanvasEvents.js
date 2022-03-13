@@ -43,13 +43,15 @@ function onresize(ctx, tableInfo) {
 
 
 
-export function checkMouseInResizeBar(mousePoint,startPoint,endPoint,startIndex,customList,defaultSize) {
+export function transCords2CellIndexAndOffset(mousePoint, startPoint, endPoint, startIndex, customList, defaultSize) {
     let currentPoint = startPoint;
+    let currentSize = defaultSize;
     for (; currentPoint < endPoint; startIndex++) {
         if (currentPoint > mousePoint) break;
-        currentPoint += customList[startIndex] ?? defaultSize;
+        currentSize = customList[startIndex] ?? defaultSize;
+        currentPoint += currentSize;
     }
-    return {posIndex:startIndex-1,posOffset:currentPoint};
+    return {posIndex:startIndex-1,posOffset:currentPoint-currentSize,posSize: currentSize};
 }
 
 export function canvasEvents(ctx, event, ...props) {
