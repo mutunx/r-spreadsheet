@@ -9,7 +9,8 @@ function Sheet() {
     const store = useStore();
     const dispatch = useDispatch();
     const [resizeHorPos,setResizeHorPos] = useState(0);
-    const [selector,setSelector] = useState({width:0,height:0,left:0,top:0});
+    const [selector,setSelector] = useState({width:0,height:0,left:0,top:0,display:"none"});
+    const [editor,setEditor] = useState({width:0,height:0,left:0,top:0,display:"none"});
     const [outOfCanvasY,setOutOfCanvasY] = useState(0);
     const [resizeVerPos,setResizeVerPos] = useState(0);
     const [resizeShow,setResizeShow] = useState("");
@@ -99,7 +100,7 @@ function Sheet() {
         el.removeEventListener('mousemove',moveFn);
     }
 
-    function canvasClickUp(e) {
+    function canvasClick(e) {
         const {
             cellHeight,
             cellWidth,
@@ -122,15 +123,48 @@ function Sheet() {
         const {posOffset:left,posSize:width} =  transCords2CellIndexAndOffset(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
         const {posOffset:top,posSize:height} =  transCords2CellIndexAndOffset(e.clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
         console.log({width,height,left,top})
-        setSelector({width,height,left,top:top + outOfCanvasY});
+
+        console.log(e.detail)
+
+        setEditor({...editor,display: "none"})
+        setSelector({width,height,left,top:top + outOfCanvasY,display: "block"});
+
+    }
+
+    function selectorDoubleClickHandler(e) {
+        const {
+            cellHeight,
+            cellWidth,
+            columnHeaderHeight,
+            rowHeaderWidth,
+            strokeWidth,
+            rowHeights,
+            colWidths,
+            scroll,
+        } = store.tableInfo;
+        const header = {
+            width: rowHeaderWidth + strokeWidth,
+            height: columnHeaderHeight + strokeWidth,
+        }
+        // header void
+        e.clientY -= outOfCanvasY;
+        if ((e.clientY < columnHeaderHeight && e.clientX > rowHeaderWidth) || (e.clientX < rowHeaderWidth && e.clientY > columnHeaderHeight)) {
+            return;
+        }
+        const {posOffset:left,posSize:width} =  transCords2CellIndexAndOffset(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
+        const {posOffset:top,posSize:height} =  transCords2CellIndexAndOffset(e.clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
+        setSelector({...selector,display: "none"})
+        setEditor({width,height,left,top:top + outOfCanvasY,display: "block"});
     }
 
     return (
         <>
-            <Canvas setCanvas={setCanvas} onMouseUp={canvasClickUp} onMouseMove={resizerHandler} width={document.documentElement.clientWidth} height={document.documentElement.clientHeight - 80} />
+            <Canvas setCanvas={setCanvas} onClick={canvasClick} onMouseMove={resizerHandler} width={document.documentElement.clientWidth} height={document.documentElement.clientHeight - 80} />
             <div ref={resizeHor} onMouseDown={horResizeDown} onMouseUp={horResizeUp} className={`w-2 hover:w-2.5 absolute bg-amber-200 cursor-col-resize`} style={{display:resizeShow ==="hor"?"block":"none",left:`${resizeHorPos}px`,top:`${resizeVerPos}px`,height:`${store.tableInfo.columnHeaderHeight}px`}}  />
             <div  className={`h-2 hover:h-2.5 absolute bg-amber-200 cursor-row-resize`} style={{display:resizeShow ==="ver"?"block":"none",left:`${resizeHorPos}px`,top:`${resizeVerPos}px`,width:`${store.tableInfo.rowHeaderWidth}px`}}  />
-            <div className={`absolute border-2 border-indigo-200`} style={{width:selector.width,height:selector.height,left:selector.left,top:selector.top}} />
+            <div className={`absolute border-2 border-indigo-200`} onDoubleClick={selectorDoubleClickHandler} style={{width:selector.width,height:selector.height,left:selector.left,top:selector.top,display:selector.display}} />
+             {/*todo how it work > ref={input=> input && input.focus()} <*/}
+            <input ref={input=> input && input.focus()}  className={`absolute border-2 border-black`}  style={{width:editor.width,height:editor.height,left:editor.left,top:editor.top,display:editor.display}} />
         </>
 
     );
