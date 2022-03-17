@@ -1,4 +1,5 @@
 import {transCords2CellIndexAndOffset} from "./CanvasEvents";
+import {tab} from "@testing-library/user-event/dist/tab";
 
 const drawEvents = {
     "Text": drawText,
@@ -75,6 +76,15 @@ function drawTableHeader(ctx, tableInfo, e = null) {
         drawLine(ctx, [0, rowIndex], [sumWidth, rowIndex], lineColor, strokeWidth)
         rowIndex += indexCellHeight + strokeWidth;
     }
+
+    for(let r = 1; r <= tableInfo.rowCount; r++) {
+        if (!!!tableInfo.rows[r]) continue;
+        for (let c = 1; c <= tableInfo.columnCount; c++) {
+            if (!!!tableInfo.rows[r][c]) continue;
+
+        }
+    }
+
 }
 
 export default function canvasDraw(ctx, event, ...args) {

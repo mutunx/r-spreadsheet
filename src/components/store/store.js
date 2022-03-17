@@ -13,6 +13,28 @@ const defaultTableInfo = {
     baseColor: "#f3f4f6",
     hoverColor: "#e5e7eb",
     lineColor: "#d1d5db",
+    rows: {
+        0:{
+            cols:{
+                0:{
+                    text:"hello"
+                },
+                1:{
+                    text:"world"
+                }
+            }
+        },
+        6: {
+            cols: {
+                2:{
+                    text: "welcome"
+                },
+                3:{
+                    text:"home"
+                }
+            }
+        }
+    },
     rowHeights:{
         2:40,
     },

@@ -54,6 +54,10 @@ export function transCords2CellIndexAndOffset(mousePoint, startPoint, endPoint, 
     return {posIndex:startIndex-1,posOffset:currentPoint-currentSize,posSize: currentSize};
 }
 
+export function pos2offset(targetPos,startPos,endPos,customList,defaultSize) {
+
+}
+
 export function canvasEvents(ctx, event, ...props) {
     if (!Object.keys(events).includes(event)) console.error("invalid event in drawEvent")
     return events[event](ctx, ...props);
