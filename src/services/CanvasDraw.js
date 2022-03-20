@@ -1,4 +1,4 @@
-import {transCords2CellIndexAndOffset} from "./CanvasEvents";
+import {pos2offset, transCords2CellIndexAndOffset} from "./CanvasEvents";
 import {tab} from "@testing-library/user-event/dist/tab";
 
 const drawEvents = {
@@ -55,7 +55,7 @@ function drawTableHeader(ctx, tableInfo, e = null) {
                 drawRect(ctx, [colIndex, 0], indexColumnWidth, columnHeaderHeight, hoverColor)
             }
         }
-        drawText(ctx, stringAt(scroll.ci + i ), [colIndex + indexColumnWidth / 2, columnHeaderHeight / 2]);
+        drawText(ctx, stringAt(scroll.ci + i ), [colIndex + indexColumnWidth / 2, columnHeaderHeight / 2],'header');
         colIndex += indexColumnWidth + strokeWidth;
     }
     // row header
@@ -72,16 +72,24 @@ function drawTableHeader(ctx, tableInfo, e = null) {
                 drawRect(ctx, [0, rowIndex], rowHeaderWidth, indexCellHeight, hoverColor)
             }
         }
-        drawText(ctx, scroll.ri + i + 1, [rowHeaderWidth / 2, rowIndex + indexCellHeight / 2]);
+        drawText(ctx, scroll.ri + i + 1, [rowHeaderWidth / 2, rowIndex + indexCellHeight / 2],'header');
         drawLine(ctx, [0, rowIndex], [sumWidth, rowIndex], lineColor, strokeWidth)
         rowIndex += indexCellHeight + strokeWidth;
     }
 
-    for(let r = 1; r <= tableInfo.rowCount; r++) {
+    for(let r = 0; r < tableInfo.rowCount; r++) {
         if (!!!tableInfo.rows[r]) continue;
-        for (let c = 1; c <= tableInfo.columnCount; c++) {
-            if (!!!tableInfo.rows[r][c]) continue;
-
+        for (let c = 0; c <= tableInfo.columnCount; c++) {
+            if (!!!tableInfo.rows[r].cols[c]) continue;
+            let {offset:offsetY ,size:height} = pos2offset(r,scroll.ri,scroll.ri + 24,tableInfo.rowHeights,tableInfo.cellHeight,tableInfo.strokeWidth);
+            // add header
+            offsetY +=  tableInfo.columnHeaderHeight + tableInfo.strokeWidth;
+            // add self size to set font can set align to bottom
+            offsetY += height + tableInfo.strokeWidth;
+            let {offset:offsetX,size:width} = pos2offset(c,scroll.ci,scroll.ci + 18,tableInfo.colWidths,tableInfo.cellWidth,tableInfo.strokeWidth);
+            offsetX += tableInfo.rowHeaderWidth + tableInfo.strokeWidth;
+            drawText(ctx,tableInfo.rows[r].cols[c].text,[offsetX,offsetY])
+            // drawRect(ctx,[offsetX,offsetY],width,height,"#666666")
         }
     }
 
@@ -109,11 +117,16 @@ function drawRect(ctx, pos, width, height, style) {
     ctx.fill();
 }
 
-function drawText(ctx, text, drawTo) {
+function drawText(ctx, text, drawTo,type = "cell") {
     ctx.beginPath();
-    ctx.font = "10px Comic Sans MS";
-    ctx.textAlign = "center";
-    ctx.textBaseline = 'middle';
+    ctx.font = "15px Comic Sans MS";
+    ctx.textAlign = "left";
+    ctx.textBaseline = 'bottom';
+    if (type === 'header') {
+        ctx.font = ctx.font.replace(/\d+px/, "10px");
+        ctx.textAlign = "center";
+        ctx.textBaseline = 'middle';
+    }
     ctx.fillStyle = "#000000"
     ctx.fillText(text, drawTo[0], drawTo[1]);
 }
