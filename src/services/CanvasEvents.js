@@ -43,16 +43,32 @@ function onresize(ctx, tableInfo) {
 
 
 
-export function checkMouseInResizeBar(mousePoint,startPoint,endPoint,startIndex,customList,defaultSize) {
+export function transCords2CellIndexAndOffset(mousePoint, startPoint, endPoint, startIndex, customList, defaultSize) {
     let currentPoint = startPoint;
+    let currentSize = defaultSize;
     for (; currentPoint < endPoint; startIndex++) {
         if (currentPoint > mousePoint) break;
-        currentPoint += customList[startIndex] ?? defaultSize;
+        currentSize = customList[startIndex] ?? defaultSize;
+        currentPoint += currentSize;
     }
-    return {posIndex:startIndex-1,posOffset:currentPoint};
+    return {posIndex:startIndex-1,posOffset:currentPoint-currentSize,posSize: currentSize};
+}
+
+export function pos2offset(targetPos,startPos,endPos,customList,defaultSize,stokeWidth) {
+    let offset = 0;
+    let size = 0;
+    if (targetPos < startPos || targetPos > endPos) return {offset:-1,size:-1};
+    for(; startPos <= targetPos; startPos++) {
+        size = customList[startPos] ?? defaultSize;
+        size += stokeWidth;
+        if (startPos !== targetPos) offset += size;
+    }
+    return {offset,size};
 }
 
 export function canvasEvents(ctx, event, ...props) {
     if (!Object.keys(events).includes(event)) console.error("invalid event in drawEvent")
     return events[event](ctx, ...props);
 }
+
+// todo find a way to get the screen max display ri and ci , and need know the size and offset
