@@ -82,11 +82,13 @@ function drawTableHeader(ctx, tableInfo, e = null) {
         for (let c = 0; c <= tableInfo.columnCount; c++) {
             if (!!!tableInfo.rows[r].cols[c]) continue;
             let {offset:offsetY ,size:height} = pos2offset(r,scroll.ri,scroll.ri + 24,tableInfo.rowHeights,tableInfo.cellHeight,tableInfo.strokeWidth);
+            if(offsetY === -1) continue;
             // add header
             offsetY +=  tableInfo.columnHeaderHeight + tableInfo.strokeWidth;
             // add self size to set font can set align to bottom
             offsetY += height + tableInfo.strokeWidth;
             let {offset:offsetX,size:width} = pos2offset(c,scroll.ci,scroll.ci + 18,tableInfo.colWidths,tableInfo.cellWidth,tableInfo.strokeWidth);
+            if(offsetX === -1) continue;
             offsetX += tableInfo.rowHeaderWidth + tableInfo.strokeWidth;
             drawText(ctx,tableInfo.rows[r].cols[c].text,[offsetX,offsetY])
             // drawRect(ctx,[offsetX,offsetY],width,height,"#666666")

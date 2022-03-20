@@ -6,11 +6,12 @@ import {useDispatch, useStore} from "../store/store";
 function Sheet() {
 
     let canvas = null;
+    const defaultEditor = {text:'',ri:0,ci:0,width:0,height:0,left:0,top:0,display:"none"};
     const store = useStore();
     const dispatch = useDispatch();
     const [resizeHorPos,setResizeHorPos] = useState(0);
     const [selector,setSelector] = useState({width:0,height:0,left:0,top:0,display:"none"});
-    const [editor,setEditor] = useState({width:0,height:0,left:0,top:0,display:"none"});
+    const [editor,setEditor] = useState(defaultEditor);
     const [outOfCanvasY,setOutOfCanvasY] = useState(0);
     const [resizeVerPos,setResizeVerPos] = useState(0);
     const [resizeShow,setResizeShow] = useState("");
@@ -151,20 +152,38 @@ function Sheet() {
         if ((e.clientY < columnHeaderHeight && e.clientX > rowHeaderWidth) || (e.clientX < rowHeaderWidth && e.clientY > columnHeaderHeight)) {
             return;
         }
-        const {posOffset:left,posSize:width} =  transCords2CellIndexAndOffset(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
-        const {posOffset:top,posSize:height} =  transCords2CellIndexAndOffset(e.clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
+        const {posOffset:left,posSize:width,posIndex:ci} =  transCords2CellIndexAndOffset(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
+        const {posOffset:top,posSize:height,posIndex:ri} =  transCords2CellIndexAndOffset(e.clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
+        let text = '';
+        if (store.tableInfo.rows[ri] && store.tableInfo.rows[ri].cols && store.tableInfo.rows[ri].cols[ci]) {
+            text = store.tableInfo.rows[ri].cols[ci].text;
+        }
         setSelector({...selector,display: "none"})
-        setEditor({width,height,left,top:top + outOfCanvasY,display: "block"});
+        setEditor({text,ri,ci,width,height,left,top:top + outOfCanvasY,display: "block"});
+    }
+
+    function onEditorBlur(e) {
+        console.log("blur")
+        //get value
+        const text = e.target.value;
+        // update store
+        const rows = store.tableInfo.rows;
+        rows[editor.ri] = rows[editor.ri] ?? {cols: {}};
+        rows[editor.ri].cols[editor.ci] = {text}
+        dispatch({
+            type: "tableInfo",
+            value: {...store.tableInfo,rows},
+        })
     }
 
     return (
         <>
             <Canvas setCanvas={setCanvas} onClick={canvasClick} onMouseMove={resizerHandler} width={document.documentElement.clientWidth} height={document.documentElement.clientHeight - 80} />
             <div ref={resizeHor} onMouseDown={horResizeDown} onMouseUp={horResizeUp} className={`w-2 hover:w-2.5 absolute bg-amber-200 cursor-col-resize`} style={{display:resizeShow ==="hor"?"block":"none",left:`${resizeHorPos}px`,top:`${resizeVerPos}px`,height:`${store.tableInfo.columnHeaderHeight}px`}}  />
-            <div  className={`h-2 hover:h-2.5 absolute bg-amber-200 cursor-row-resize`} style={{display:resizeShow ==="ver"?"block":"none",left:`${resizeHorPos}px`,top:`${resizeVerPos}px`,width:`${store.tableInfo.rowHeaderWidth}px`}}  />
+            <div className={`h-2 hover:h-2.5 absolute bg-amber-200 cursor-row-resize`} style={{display:resizeShow ==="ver"?"block":"none",left:`${resizeHorPos}px`,top:`${resizeVerPos}px`,width:`${store.tableInfo.rowHeaderWidth}px`}}  />
             <div className={`absolute border-2 border-indigo-200`} onDoubleClick={selectorDoubleClickHandler} style={{width:selector.width,height:selector.height,left:selector.left,top:selector.top,display:selector.display}} />
              {/*todo how it work > ref={input=> input && input.focus()} <*/}
-            <input ref={input=> input && input.focus()}  className={`absolute border-2 border-black`}  style={{width:editor.width,height:editor.height,left:editor.left,top:editor.top,display:editor.display}} />
+            <input ref={input=> input && input.focus()} onBlur={onEditorBlur} key={`${Math.floor((Math.random() * 1000))}-min`} className={`absolute border-2 border-black`} defaultValue={editor.text}  style={{width:editor.width,height:editor.height,left:editor.left,top:editor.top,display:editor.display}} />
         </>
 
     );

@@ -57,7 +57,7 @@ export function transCords2CellIndexAndOffset(mousePoint, startPoint, endPoint, 
 export function pos2offset(targetPos,startPos,endPos,customList,defaultSize,stokeWidth) {
     let offset = 0;
     let size = 0;
-    if (targetPos < startPos || targetPos > endPos) return {offset,size};
+    if (targetPos < startPos || targetPos > endPos) return {offset:-1,size:-1};
     for(; startPos <= targetPos; startPos++) {
         size = customList[startPos] ?? defaultSize;
         size += stokeWidth;

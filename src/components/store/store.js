@@ -57,7 +57,7 @@ function handler(state, action) {
         case "tableInfo":
             return {...state, tableInfo: action.value}
         default:
-            throw new Error();
+            throw new Error("no such type");
     }
 }
 
