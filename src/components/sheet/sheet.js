@@ -121,15 +121,18 @@ function Sheet() {
         if ((e.clientY < columnHeaderHeight && e.clientX > rowHeaderWidth) || (e.clientX < rowHeaderWidth && e.clientY > columnHeaderHeight)) {
             return;
         }
-        const {posOffset:left,posSize:width} =  transCords2CellIndexAndOffset(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
-        const {posOffset:top,posSize:height} =  transCords2CellIndexAndOffset(e.clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
+        const {posIndex:ci,posOffset:left,posSize:width} =  transCords2CellIndexAndOffset(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
+        const {posIndex:ri,posOffset:top,posSize:height} =  transCords2CellIndexAndOffset(e.clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
         console.log({width,height,left,top})
 
         console.log(e.detail)
 
         setEditor({...editor,display: "none"})
         setSelector({width,height,left,top:top + outOfCanvasY,display: "block"});
-
+        dispatch({
+            type:"editor",
+            value: {ri,ci},
+        })
     }
 
     function selectorDoubleClickHandler(e) {

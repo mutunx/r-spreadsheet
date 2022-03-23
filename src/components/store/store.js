@@ -46,7 +46,7 @@ const defaultTableInfo = {
         ci:0,
     }
 }
-const initialState = {fileName: "new_file", tableInfo: defaultTableInfo, drawEvent: null}
+const initialState = {fileName: "new_file", tableInfo: defaultTableInfo, drawEvent: null,editor: {ri:-1,ci:-1},}
 
 function handler(state, action) {
     switch (action.type) {
@@ -56,6 +56,8 @@ function handler(state, action) {
             return {...state, drawEvent: action.value}
         case "tableInfo":
             return {...state, tableInfo: action.value}
+        case "editor":
+            return {...state, editor: action.value}
         default:
             throw new Error("no such type");
     }

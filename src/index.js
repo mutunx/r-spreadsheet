@@ -1,17 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import Canvas from './components/canvas/canvas';
 import reportWebVitals from './reportWebVitals';
 import {StoreProvider} from "./components/store/store";
-import AdjustBar from "./components/adjustbar/adjustbar";
 import Sheet from "./components/sheet/sheet";
+import FormulaBar from "./components/formularbar/formulabar";
 
 ReactDOM.render(
     <React.StrictMode>
         <StoreProvider>
             <div className={"h-screen w-screen"}>
-                <AdjustBar />
+                <FormulaBar />
                 <Sheet/>
             </div>
         </StoreProvider>
