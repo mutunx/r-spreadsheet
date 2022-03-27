@@ -5,11 +5,13 @@ import reportWebVitals from './reportWebVitals';
 import {StoreProvider} from "./components/store/store";
 import Sheet from "./components/sheet/sheet";
 import FormulaBar from "./components/formularbar/formulabar";
+import ToolBar from "./components/toolbar/toolbar";
 
 ReactDOM.render(
     <React.StrictMode>
         <StoreProvider>
             <div className={"h-screen w-screen"}>
+                <ToolBar />
                 <FormulaBar />
                 <Sheet/>
             </div>

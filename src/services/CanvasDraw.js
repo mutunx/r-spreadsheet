@@ -55,7 +55,7 @@ function drawTableHeader(ctx, tableInfo, e = null) {
                 drawRect(ctx, [colIndex, 0], indexColumnWidth, columnHeaderHeight, hoverColor)
             }
         }
-        drawText(ctx, stringAt(scroll.ci + i ), [colIndex + indexColumnWidth / 2, columnHeaderHeight / 2],'header');
+        drawText(ctx, stringAt(scroll.ci + i ), [colIndex + indexColumnWidth / 2, columnHeaderHeight / 2],"",'header');
         colIndex += indexColumnWidth + strokeWidth;
     }
     // row header
@@ -72,7 +72,7 @@ function drawTableHeader(ctx, tableInfo, e = null) {
                 drawRect(ctx, [0, rowIndex], rowHeaderWidth, indexCellHeight, hoverColor)
             }
         }
-        drawText(ctx, scroll.ri + i + 1, [rowHeaderWidth / 2, rowIndex + indexCellHeight / 2],'header');
+        drawText(ctx, scroll.ri + i + 1, [rowHeaderWidth / 2, rowIndex + indexCellHeight / 2],"",'header');
         drawLine(ctx, [0, rowIndex], [sumWidth, rowIndex], lineColor, strokeWidth)
         rowIndex += indexCellHeight + strokeWidth;
     }
@@ -90,7 +90,7 @@ function drawTableHeader(ctx, tableInfo, e = null) {
             let {offset:offsetX,size:width} = pos2offset(c,scroll.ci,scroll.ci + 18,tableInfo.colWidths,tableInfo.cellWidth,tableInfo.strokeWidth);
             if(offsetX === -1) continue;
             offsetX += tableInfo.rowHeaderWidth + tableInfo.strokeWidth;
-            drawText(ctx,tableInfo.rows[r].cols[c].text,[offsetX,offsetY])
+            drawText(ctx,tableInfo.rows[r].cols[c].text,[offsetX,offsetY],tableInfo.rows[r].cols[c].type ?? '')
             // drawRect(ctx,[offsetX,offsetY],width,height,"#666666")
         }
     }
@@ -119,12 +119,12 @@ function drawRect(ctx, pos, width, height, style) {
     ctx.fill();
 }
 
-function drawText(ctx, text, drawTo,type = "cell") {
+function drawText(ctx, text, drawTo,fontType,drawType = "cell") {
     ctx.beginPath();
-    ctx.font = "15px Comic Sans MS";
+    ctx.font = fontType +" 15px Comic Sans MS";
     ctx.textAlign = "left";
     ctx.textBaseline = 'bottom';
-    if (type === 'header') {
+    if (drawType === 'header') {
         ctx.font = ctx.font.replace(/\d+px/, "10px");
         ctx.textAlign = "center";
         ctx.textBaseline = 'middle';
