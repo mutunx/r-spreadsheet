@@ -10,7 +10,7 @@ function Sheet() {
     const store = useStore();
     const dispatch = useDispatch();
     const [resizeHorPos,setResizeHorPos] = useState(0);
-    const [selector,setSelector] = useState({width:0,height:0,left:0,top:0,display:"none"});
+    const [selector,setSelector] = useState({width:0,height:0,left:0,top:0,display:"none",moving:false});
     const [editor,setEditor] = useState(defaultEditor);
     const [outOfCanvasY,setOutOfCanvasY] = useState(0);
     const [resizeVerPos,setResizeVerPos] = useState(0);
@@ -127,14 +127,47 @@ function Sheet() {
         const {posIndex:ri,posOffset:top,posSize:height} =  transCords2CellIndexAndOffset(e.clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
         console.log({...selector,left,top:top + outOfCanvasY})
         setEditor({...editor,display: "none"})
-        setSelector({...selector,left,top:top + outOfCanvasY});
+        setSelector({top:top + outOfCanvasY,display: "block",width: 0,height: 0,left,ci,ri,moving:true});
         console.log("down",selector)
-        canvasRef.current.addEventListener('mousemove',selectorMouseMove);
+        canvasRef.current.addEventListener('mousemove',selectorMouseMove(top + outOfCanvasY,left));
         // add new listen to deal move
 
     }
 
-    function selectorMouseMove(e) {
+    function selectorMouseMove(startTop,startLeft) {
+        return (e) => {
+            const {
+                cellHeight,
+                cellWidth,
+                columnHeaderHeight,
+                rowHeaderWidth,
+                strokeWidth,
+                rowHeights,
+                colWidths,
+                scroll,
+            } = store.tableInfo;
+            const header = {
+                width: rowHeaderWidth + strokeWidth,
+                height: columnHeaderHeight + strokeWidth,
+            }
+            // header void
+            const clientY = e.clientY - outOfCanvasY;
+            if ((clientY < columnHeaderHeight && e.clientX > rowHeaderWidth) || (e.clientX < rowHeaderWidth && clientY > columnHeaderHeight)) {
+                return;
+            }
+            const {posIndex:ci,posOffset:left,posSize:width} =  transCords2CellIndexAndOffset(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
+            const {posIndex:ri,posOffset:top,posSize:height} =  transCords2CellIndexAndOffset(clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
+            // console.log({width:e.clientX-left,height:clientY-top,left,top:top + outOfCanvasY,display: "block"})
+
+            console.log({width:e.clientX-selector.left,height:clientY-selector.top},selector)
+            console.log({...selector})
+            setSelector({top:startTop,left:startLeft, width:e.clientX-selector.left,height:clientY-selector.top,ri,ci,display: "block",moving: true})
+            console.log("move",selector)
+        }
+
+    }
+
+    function canvasMouseUp(e) {
         const {
             cellHeight,
             cellWidth,
@@ -156,42 +189,12 @@ function Sheet() {
         }
         const {posIndex:ci,posOffset:left,posSize:width} =  transCords2CellIndexAndOffset(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
         const {posIndex:ri,posOffset:top,posSize:height} =  transCords2CellIndexAndOffset(clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
-        // console.log({width:e.clientX-left,height:clientY-top,left,top:top + outOfCanvasY,display: "block"})
-
-        console.log(e.clientX,e.pageX,selector.left)
-        console.log({...selector})
-        setSelector({...selector, width:e.clientX-selector.left,height:clientY-selector.top})
-        console.log("move",selector)
-    }
-
-    function canvasMouseUp(e) {
-        const {
-            cellHeight,
-            cellWidth,
-            columnHeaderHeight,
-            rowHeaderWidth,
-            strokeWidth,
-            rowHeights,
-            colWidths,
-            scroll,
-        } = store.tableInfo;
-        const header = {
-            width: rowHeaderWidth + strokeWidth,
-            height: columnHeaderHeight + strokeWidth,
-        }
-        // header void
-        e.clientY -= outOfCanvasY;
-        if ((e.clientY < columnHeaderHeight && e.clientX > rowHeaderWidth) || (e.clientX < rowHeaderWidth && e.clientY > columnHeaderHeight)) {
-            return;
-        }
-        const {posIndex:ci,posOffset:left,posSize:width} =  transCords2CellIndexAndOffset(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
-        const {posIndex:ri,posOffset:top,posSize:height} =  transCords2CellIndexAndOffset(e.clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
-        setSelector({...selector, display: "block"});
+        setSelector({...selector,moving: false});
         dispatch({
             type:"editor",
             value: {ri,ci},
         })
-        canvasRef.current.removeEventListener("mousemove",selectorMouseMove)
+        canvasRef.current.removeEventListener("mousemove",selectorMouseMove(selector.top,selector.left));
     }
 
     function selectorDoubleClickHandler(e) {
