@@ -6,7 +6,7 @@ import canvasDraw from "../../services/CanvasDraw";
 function  Canvas(props) {
 
     const {setCanvas,...rest} = props
-    const canvasRef = useRef(null)
+    const canvasRef = props.canvasref
     const dispatch = useDispatch();
     const store = useStore();
 

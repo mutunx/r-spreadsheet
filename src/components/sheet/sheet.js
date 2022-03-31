@@ -17,6 +17,7 @@ function Sheet() {
     const [resizeShow,setResizeShow] = useState("");
     const [resizeBarPos,setResizeBarPos] = useState({index:0,pos:0})
     const resizeHor = useRef(null);
+    const canvasRef = useRef(null);
     useEffect(()=>{
         canvas.current.onwheel = canvasEvents(canvas.current.getContext("2d"),"onwheel", store.tableInfo,dispatch);
     }, [canvas])
@@ -101,7 +102,69 @@ function Sheet() {
         el.removeEventListener('mousemove',moveFn);
     }
 
-    function canvasClick(e) {
+    function canvasMouseDown(e) {
+        // recode start position
+        const {
+            cellHeight,
+            cellWidth,
+            columnHeaderHeight,
+            rowHeaderWidth,
+            strokeWidth,
+            rowHeights,
+            colWidths,
+            scroll,
+        } = store.tableInfo;
+        const header = {
+            width: rowHeaderWidth + strokeWidth,
+            height: columnHeaderHeight + strokeWidth,
+        }
+        // header void
+        const clientY = e.clientY - outOfCanvasY;
+        if ((clientY < columnHeaderHeight && e.clientX > rowHeaderWidth) || (e.clientX < rowHeaderWidth && clientY > columnHeaderHeight)) {
+            return;
+        }
+        const {posIndex:ci,posOffset:left,posSize:width} =  transCords2CellIndexAndOffset(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
+        const {posIndex:ri,posOffset:top,posSize:height} =  transCords2CellIndexAndOffset(e.clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
+        console.log({...selector,left,top:top + outOfCanvasY})
+        setEditor({...editor,display: "none"})
+        setSelector({...selector,left,top:top + outOfCanvasY});
+        console.log("down",selector)
+        canvasRef.current.addEventListener('mousemove',selectorMouseMove);
+        // add new listen to deal move
+
+    }
+
+    function selectorMouseMove(e) {
+        const {
+            cellHeight,
+            cellWidth,
+            columnHeaderHeight,
+            rowHeaderWidth,
+            strokeWidth,
+            rowHeights,
+            colWidths,
+            scroll,
+        } = store.tableInfo;
+        const header = {
+            width: rowHeaderWidth + strokeWidth,
+            height: columnHeaderHeight + strokeWidth,
+        }
+        // header void
+        const clientY = e.clientY - outOfCanvasY;
+        if ((clientY < columnHeaderHeight && e.clientX > rowHeaderWidth) || (e.clientX < rowHeaderWidth && clientY > columnHeaderHeight)) {
+            return;
+        }
+        const {posIndex:ci,posOffset:left,posSize:width} =  transCords2CellIndexAndOffset(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
+        const {posIndex:ri,posOffset:top,posSize:height} =  transCords2CellIndexAndOffset(clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
+        // console.log({width:e.clientX-left,height:clientY-top,left,top:top + outOfCanvasY,display: "block"})
+
+        console.log(e.clientX,e.pageX,selector.left)
+        console.log({...selector})
+        setSelector({...selector, width:e.clientX-selector.left,height:clientY-selector.top})
+        console.log("move",selector)
+    }
+
+    function canvasMouseUp(e) {
         const {
             cellHeight,
             cellWidth,
@@ -123,16 +186,12 @@ function Sheet() {
         }
         const {posIndex:ci,posOffset:left,posSize:width} =  transCords2CellIndexAndOffset(e.clientX,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
         const {posIndex:ri,posOffset:top,posSize:height} =  transCords2CellIndexAndOffset(e.clientY,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
-        console.log({width,height,left,top})
-
-        console.log(e.detail)
-
-        setEditor({...editor,display: "none"})
-        setSelector({width,height,left,top:top + outOfCanvasY,display: "block"});
+        setSelector({...selector, display: "block"});
         dispatch({
             type:"editor",
             value: {ri,ci},
         })
+        canvasRef.current.removeEventListener("mousemove",selectorMouseMove)
     }
 
     function selectorDoubleClickHandler(e) {
@@ -181,8 +240,8 @@ function Sheet() {
 
     return (
         <>
-            <Canvas setCanvas={setCanvas} onClick={canvasClick} onMouseMove={resizerHandler} width={document.documentElement.clientWidth} height={document.documentElement.clientHeight - 80} />
-            <div ref={resizeHor} onMouseDown={horResizeDown} onMouseUp={horResizeUp} className={`w-2 hover:w-2.5 absolute bg-amber-200 cursor-col-resize`} style={{display:resizeShow ==="hor"?"block":"none",left:`${resizeHorPos}px`,top:`${resizeVerPos}px`,height:`${store.tableInfo.columnHeaderHeight}px`}}  />
+            <Canvas canvasref={canvasRef} setCanvas={setCanvas} onMouseDown={canvasMouseDown} onMouseUp={canvasMouseUp} onMouseMove={resizerHandler} width={document.documentElement.clientWidth} height={document.documentElement.clientHeight - 80} />
+            <div ref={resizeHor} onMouseDown={horResizeDown}  onMouseUp={horResizeUp} className={`w-2 hover:w-2.5 absolute bg-amber-200 cursor-col-resize`} style={{display:resizeShow ==="hor"?"block":"none",left:`${resizeHorPos}px`,top:`${resizeVerPos}px`,height:`${store.tableInfo.columnHeaderHeight}px`}}  />
             <div className={`h-2 hover:h-2.5 absolute bg-amber-200 cursor-row-resize`} style={{display:resizeShow ==="ver"?"block":"none",left:`${resizeHorPos}px`,top:`${resizeVerPos}px`,width:`${store.tableInfo.rowHeaderWidth}px`}}  />
             <div className={`absolute border-2 border-indigo-200`} onDoubleClick={selectorDoubleClickHandler} style={{width:selector.width,height:selector.height,left:selector.left,top:selector.top,display:selector.display}} />
              {/*todo how it work > ref={input=> input && input.focus()} <*/}
