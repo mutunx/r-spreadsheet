@@ -3,8 +3,8 @@ import {transCords2CellIndexAndOffset} from "../../../services/CanvasEvents";
 import {useDispatch, useStore} from "../../store/store";
 
 function Selector(props) {
-
-    const {outOfCanvasY,x,y} = props
+    const {client,offset} = props.mouseDownPos
+    const outOfCanvasY = client.y - offset.y
     const store = useStore();
     const dispatch = useDispatch();
     const [selector, setSelector] = useState({width: 0, height: 0, left: 0, top: 0, display: "none", moving: false});
@@ -28,20 +28,19 @@ function Selector(props) {
             height: columnHeaderHeight + strokeWidth,
         }
         // header void
-        const clientY = y - outOfCanvasY;
-        if ((clientY < columnHeaderHeight && x > rowHeaderWidth) || (x < rowHeaderWidth && clientY > columnHeaderHeight)) {
+        if ((offset.y < columnHeaderHeight && offset.x > rowHeaderWidth) || (offset.x < rowHeaderWidth && offset.y > columnHeaderHeight)) {
             return;
         }
         const {
             posIndex: ci,
             posOffset: left,
             posSize: width
-        } = transCords2CellIndexAndOffset(x, header.width, window.screen.width, scroll.ci, colWidths, cellWidth + strokeWidth);
+        } = transCords2CellIndexAndOffset(client.x, header.width, window.screen.width, scroll.ci, colWidths, cellWidth + strokeWidth);
         const {
             posIndex: ri,
             posOffset: top,
             posSize: height
-        } = transCords2CellIndexAndOffset(y, header.height, window.screen.height, scroll.ri, rowHeights, cellHeight + strokeWidth);
+        } = transCords2CellIndexAndOffset(client.y, header.height, window.screen.height, scroll.ri, rowHeights, cellHeight + strokeWidth);
         console.log({...selector, left, top: top + outOfCanvasY})
         setEditor({...editor, display: "none"})
         setSelector({top, display: "block", width, height, left, ci, ri, moving: true});
@@ -54,7 +53,7 @@ function Selector(props) {
         // canvasRef.current.addEventListener('mousemove', selectorMouseMove(top + outOfCanvasY, left));
         // add new listen to deal move
 
-    }, [x, y])
+    }, [offset])
 
     function canvasMouseUp(e) {
         const {

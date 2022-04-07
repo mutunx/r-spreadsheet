@@ -5,11 +5,13 @@ import canvasDraw from "../../services/CanvasDraw";
 
 function  Canvas(props) {
 
-    const {setCanvas,...rest} = props
-    const canvasRef = props.canvasref
+    const {setMouseDownPos,setMouseMovePos,...rest} = props
+    const canvasRef = useRef(null)
     const dispatch = useDispatch();
     const store = useStore();
-
+    useEffect(() => {
+        canvasRef.current.onwheel = canvasEvents(canvasRef.current.getContext("2d"), "onwheel", store.tableInfo, dispatch);
+    }, [canvasRef])
     useEffect(() => {
         const canvas = canvasRef.current
         const ctx = canvas.getContext('2d');
@@ -17,7 +19,7 @@ function  Canvas(props) {
         canvas.onmousemove = canvasEvents(ctx, "onmousemove", store.tableInfo);
         canvas.onwheel = canvasEvents(ctx,"onwheel", store.tableInfo,dispatch);
         window.onresize = canvasEvents(ctx, "onresize", store.tableInfo)
-        setCanvas(canvasRef);
+        // setCanvas(canvasRef);
     }, [store.tableInfo])
 
     useEffect(() => {
@@ -31,8 +33,32 @@ function  Canvas(props) {
         })
     }, [store.drawEvent])
 
+
+    function getPos(e) {
+        return {
+            client: {
+                x:e.nativeEvent.clientX,
+                y:e.nativeEvent.clientY,
+            },
+            offset: {
+                x:e.nativeEvent.offsetX,
+                y:e.nativeEvent.offsetY,
+            }
+        }
+    }
+
+    function onMove(e) {
+        if (!!!e.nativeEvent) return;
+        setMouseMovePos(getPos(e));
+    }
+
+    function onDown(e) {
+        if (!!!e.nativeEvent) return;
+        setMouseDownPos(getPos(e));
+    }
+
     return (
-        <canvas ref={canvasRef} {...rest} />
+        <canvas ref={canvasRef} onMouseMove={onMove} onMouseDown={onDown} {...rest} />
     );
 }
 

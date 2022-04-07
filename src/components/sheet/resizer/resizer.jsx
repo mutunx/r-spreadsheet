@@ -3,8 +3,8 @@ import {transCords2CellIndexAndOffset} from "../../../services/CanvasEvents";
 import {useDispatch, useStore} from "../../store/store";
 
 function Resizer(props) {
-    const {outOfCanvasY} = props;
-    const {x,y} = props.movePos;
+    const {client,offset} = props.mouseMovePos;
+    const outOfCanvasY = client.y - offset.y;
     const resizeHor = useRef(null);
     const store = useStore();
     const dispatch = useDispatch();
@@ -36,20 +36,20 @@ function Resizer(props) {
         if (resizeBarPos.index !== 0) {
             return;
         }
-        if (y < columnHeaderHeight && x > rowHeaderWidth) {
-            const {posOffset,posSize} =  transCords2CellIndexAndOffset(x,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
+        if (offset.y < columnHeaderHeight && offset.x > rowHeaderWidth) {
+            const {posOffset,posSize} =  transCords2CellIndexAndOffset(offset.x,header.width,window.screen.width,scroll.ci,colWidths,cellWidth + strokeWidth);
             setResizeHorPos(posOffset+posSize);
             setResizeVerPos(outOfCanvasY);
             setResizeShow("hor");
-        } else if (x < rowHeaderWidth && y > columnHeaderHeight){
-            const {posOffset,posSize} =  transCords2CellIndexAndOffset(y,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
+        } else if (offset.x < rowHeaderWidth && offset.y > columnHeaderHeight){
+            const {posOffset,posSize} =  transCords2CellIndexAndOffset(offset.y,header.height,window.screen.height,scroll.ri,rowHeights,cellHeight + strokeWidth);
             setResizeVerPos(outOfCanvasY + posOffset + posSize);
             setResizeHorPos(0);
             setResizeShow("ver");
         } else {
             setResizeShow("")
         }
-    },[x,y])
+    },[offset])
     function horResizeDown(e) {
         const {
             cellWidth,
