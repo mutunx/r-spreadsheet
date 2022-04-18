@@ -1,29 +1,21 @@
 import React, {useState} from 'react';
 import {useDispatch, useStore} from "../../store/store";
+import {cell, updateCell, updateRows} from "../../../utils/tableInfoUtil";
 
 function ToolButton(props) {
-    
+
     const [state,setState] = useState({active:""});
     const store = useStore();
     const dispatch = useDispatch();
 
     function itemClick(e) {
         let rows = {...store.tableInfo.rows};
-        if (!!!rows) {
-            rows = {
-                [store.editor.ri]:{cols:{}}
-            };
-        }
-        if (!!!rows[store.editor.ri].cols[store.editor.ci]) {
-            rows[store.editor.ri].cols[store.editor.ci] = {
-                type:"bold",
-            };
-        } else {
-            rows[store.editor.ri].cols[store.editor.ci].type = 'bold'
-        }
+        const newItem = cell(rows,store.editor.ri,store.editor.ci);
+        newItem.type = 'bold'
+        const newRows = updateRows(rows,store.editor.ri,store.editor.ci,newItem)
         dispatch({
             type:"tableInfo",
-            value: {...store.tableInfo, rows: rows}
+            value: {...store.tableInfo, rows: newRows}
         });
     }
     function btnOnClick(e) {
