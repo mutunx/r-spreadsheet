@@ -1,7 +1,7 @@
 import React, {createContext, useContext, useReducer} from 'react';
 
-const DispatchContext = createContext(null);
-const StateContext = createContext(null);
+const DispatchContext = createContext(()=>{});
+const StateContext = createContext(()=>{});
 const defaultTableInfo = {
     rowCount: 23,
     columnCount: 17,
@@ -73,7 +73,7 @@ function useDispatch() {
 
 function StoreProvider(props) {
 
-    const [state, dispatch] = useReducer(handler, initialState);
+    const [state, dispatch] = useReducer(handler, initialState,()=>{});
     return (
         <StateContext.Provider value={state}>
             <DispatchContext.Provider value={dispatch}>
