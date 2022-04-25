@@ -2,6 +2,8 @@ import React, {useEffect, useRef} from 'react';
 import {useDispatch, useStore} from "../store/store";
 import {canvasEvents} from "../../services/CanvasEvents";
 import canvasDraw from "../../services/CanvasDraw";
+import {getOffsetFromScroll} from "../../utils/tableInfoUtil";
+import CanvasDraw from "../../services/CanvasDraw";
 
 function  Canvas(props) {
 
@@ -10,19 +12,14 @@ function  Canvas(props) {
     const dispatch = useDispatch();
     const store = useStore();
     useEffect(() => {
-        canvasRef.current.onwheel = canvasEvents(canvasRef.current.getContext("2d"), "onwheel", store.tableInfo, dispatch);
-    }, [canvasRef])
-    useEffect(() => {
         const canvas = canvasRef.current
         const ctx = canvas.getContext('2d');
         canvasDraw(ctx, "DrawTable", store.tableInfo);
-        canvas.onmousemove = canvasEvents(ctx, "onmousemove", store.tableInfo);
-        canvas.onwheel = canvasEvents(ctx,"onwheel", store.tableInfo,dispatch);
         window.onresize = canvasEvents(ctx, "onresize", store.tableInfo)
-        // setCanvas(canvasRef);
     }, [store.tableInfo])
 
     useEffect(() => {
+        // toolbar event trigger
         if (!!!store.drawEvent) return;
         const canvas = canvasRef.current
         const ctx = canvas.getContext('2d');
@@ -48,8 +45,13 @@ function  Canvas(props) {
     }
 
     function onMove(e) {
+        const {tableInfo} = store;
+        const canvas = canvasRef.current
+        const ctx = canvas.getContext('2d');
         if (!!!e.nativeEvent) return;
         setMouseMovePos(getPos(e));
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        CanvasDraw(ctx, "DrawTable", tableInfo, e);
     }
 
     function onDown(e) {
@@ -57,8 +59,30 @@ function  Canvas(props) {
         setMouseDownPos(getPos(e));
     }
 
+    function onScroll(e) {
+        const canvas = canvasRef.current
+        const ctx = canvas.getContext('2d');
+        const {tableInfo} = store;
+        const {offsetRowIndex,offsetColumnIndex} = getOffsetFromScroll(e);
+        let newRowIndex = tableInfo.scroll.ri + offsetRowIndex;
+        let newColIndex = tableInfo.scroll.ci + offsetColumnIndex;
+        const scroll = {
+            ri: newRowIndex < 0 ? 0 : newRowIndex,
+            ci: newColIndex < 0 ? 0 : newColIndex,
+        }
+        dispatch({
+            type: "tableInfo",
+            value: {...tableInfo, scroll}
+        })
+        CanvasDraw(ctx, "DrawTable", tableInfo);
+    }
+
     return (
-        <canvas ref={canvasRef} onMouseMove={onMove} onMouseDown={onDown} {...rest} />
+        <canvas ref={canvasRef}
+                onMouseMove={onMove}
+                onMouseDown={onDown}
+                onScroll={onScroll}
+                {...rest} />
     );
 }
 

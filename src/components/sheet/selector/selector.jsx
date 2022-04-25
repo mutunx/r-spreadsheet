@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {transCords2CellIndexAndOffset} from "../../../services/CanvasEvents";
 import {useDispatch, useStore} from "../../store/store";
+import {transCords2CellIndexAndOffset} from "../../../utils/tableInfoUtil";
 
 function Selector(props) {
     const {client,offset} = props.mouseDownPos

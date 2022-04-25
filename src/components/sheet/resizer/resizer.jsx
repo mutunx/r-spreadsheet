@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {transCords2CellIndexAndOffset} from "../../../services/CanvasEvents";
 import {useDispatch, useStore} from "../../store/store";
+import {transCords2CellIndexAndOffset} from "../../../utils/tableInfoUtil";
 
 function Resizer(props) {
     const {client,offset} = props.mouseMovePos;

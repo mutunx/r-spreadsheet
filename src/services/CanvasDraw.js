@@ -1,5 +1,4 @@
-import {pos2offset, transCords2CellIndexAndOffset} from "./CanvasEvents";
-import {tab} from "@testing-library/user-event/dist/tab";
+import {pos2offset, transCords2CellIndexAndOffset} from "../utils/tableInfoUtil";
 
 const drawEvents = {
     "Text": drawText,
